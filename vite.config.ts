@@ -2,6 +2,7 @@ import { resolve } from "path";
 import { defineConfig } from "vite";
 
 export default defineConfig({
+  root: resolve(__dirname),
   base: "./",
   build: {
     outDir: "dist",
@@ -9,8 +10,8 @@ export default defineConfig({
     sourcemap: true,
     rollupOptions: {
       input: {
-        main: resolve(__dirname, "index.html"),
-        embed: resolve(__dirname, "embed.html"),
+        main: "index.html",
+        embed: "embed.html",
       },
       output: {
         entryFileNames: "assets/[name].js",

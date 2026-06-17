@@ -122,10 +122,10 @@ class ParticleMorpher {
     };
 
     const modelScales = {
-      server: 1.05,
-      wifi: 1.6,
-      coin: 1.2,
-      head: 1.3,
+      server: 1.2,
+      wifi: 1.8,
+      coin: 1.3,
+      head: 1.4,
     };
 
     const [serverPoints, wifiPoints, coinPoints, headPoints] = await Promise.all([

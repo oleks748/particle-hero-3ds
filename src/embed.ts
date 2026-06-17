@@ -19,10 +19,10 @@ const SETTINGS = {
 };
 
 const MODEL_SCALES: Record<ShapeKey, number> = {
-  server: 1.05,
-  wifi: 1.6,
-  coin: 1.2,
-  head: 1.3,
+  server: 1.2,
+  wifi: 1.8,
+  coin: 1.3,
+  head: 1.4,
 };
 
 const MODEL_FILES: Record<ShapeKey, string> = {
