@@ -15,7 +15,7 @@ export interface ParticleSettings {
 
 export const DEFAULT_SETTINGS: ParticleSettings = {
   particleCount: 5000,
-  particleSize: 5.0,
+  particleSize: 2.5,
   animationSpeed: 0.5,
   autoRotate: true,
   morphDuration: 2.5,

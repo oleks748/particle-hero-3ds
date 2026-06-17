@@ -7,7 +7,7 @@ type ShapeKey = "server" | "wifi" | "coin" | "head";
 
 const SETTINGS = {
   particleCount: 5000,
-  particleSize: 5.0,
+  particleSize: 2.5,
   animationSpeed: 0.5,
   morphDuration: 2.5,
   autoMorphDuration: 5000,
