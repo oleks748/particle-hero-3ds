@@ -50,7 +50,7 @@ class ParticleMorpher {
       antialias: true,
       alpha: true,
     });
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.setPixelRatio(this.getRenderPixelRatio());
     this.renderer.setSize(window.innerWidth, window.innerHeight);
 
     this.modelLoader = new ModelLoader();
@@ -300,13 +300,16 @@ class ParticleMorpher {
     this.camera.updateProjectionMatrix();
 
     this.renderer.setSize(width, height);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.setPixelRatio(this.getRenderPixelRatio());
     this.updateParticleSize();
   }
 
+  private getRenderPixelRatio() {
+    return Math.min(window.devicePixelRatio, 2);
+  }
+
   private getResponsiveParticleSize(size = this.settings.particleSize) {
-    const viewportScale = THREE.MathUtils.clamp(window.innerWidth / 1440, 0.75, 1.2);
-    return size * viewportScale;
+    return size * this.getRenderPixelRatio();
   }
 
   private updateParticleSize() {

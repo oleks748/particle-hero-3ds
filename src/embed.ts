@@ -7,7 +7,7 @@ type ShapeKey = "server" | "wifi" | "coin" | "head";
 
 const SETTINGS = {
   particleCount: 5000,
-  particleSize: 2.5,
+  particleSize: 5.0,
   animationSpeed: 0.5,
   morphDuration: 2.5,
   autoMorphDuration: 5000,
@@ -256,14 +256,16 @@ class ParticleHero {
     this.camera.updateProjectionMatrix();
 
     this.renderer.setSize(width, height, false);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.setPixelRatio(this.getRenderPixelRatio());
     this.updateParticleSize();
   }
 
+  private getRenderPixelRatio() {
+    return Math.min(window.devicePixelRatio, 2);
+  }
+
   private getResponsiveParticleSize(size = SETTINGS.particleSize) {
-    const width = Math.max(this.root.clientWidth, window.innerWidth);
-    const viewportScale = THREE.MathUtils.clamp(width / 1440, 0.75, 1.2);
-    return size * viewportScale;
+    return size * this.getRenderPixelRatio();
   }
 
   private updateParticleSize() {
