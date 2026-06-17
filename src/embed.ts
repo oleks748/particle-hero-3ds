@@ -338,7 +338,29 @@ class ParticleHero {
   }
 }
 
-const root = document.getElementById("particle-hero");
-if (root) {
-  new ParticleHero(root);
+function ensureRoot() {
+  const existingRoot = document.getElementById("particle-hero");
+  if (existingRoot) return existingRoot;
+
+  const root = document.createElement("div");
+  root.id = "particle-hero";
+  root.style.position = "absolute";
+  root.style.inset = "0";
+  root.style.width = "100%";
+  root.style.height = "100%";
+  root.style.overflow = "hidden";
+  root.style.pointerEvents = "none";
+  root.style.zIndex = "0";
+  document.body.prepend(root);
+  return root;
+}
+
+function startParticleHero() {
+  new ParticleHero(ensureRoot());
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", startParticleHero, { once: true });
+} else {
+  startParticleHero();
 }
