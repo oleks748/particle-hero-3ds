@@ -35,7 +35,7 @@ class ParticleMorpher {
     this.settings = { ...DEFAULT_SETTINGS }; // Clone defaults
 
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0xffffff);
+    this.scene.background = new THREE.Color(0xfcfaf9);
 
     this.camera = new THREE.PerspectiveCamera(
       38,
