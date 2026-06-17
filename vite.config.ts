@@ -1,3 +1,4 @@
+import { resolve } from "path";
 import { defineConfig } from "vite";
 
 export default defineConfig({
@@ -7,7 +8,14 @@ export default defineConfig({
     assetsDir: "assets",
     sourcemap: true,
     rollupOptions: {
+      input: {
+        main: resolve(__dirname, "index.html"),
+        embed: resolve(__dirname, "embed.html"),
+      },
       output: {
+        entryFileNames: "assets/[name].js",
+        chunkFileNames: "assets/[name].js",
+        assetFileNames: "assets/[name][extname]",
         manualChunks: {
           three: ["three"],
           gsap: ["gsap"],
@@ -25,6 +33,9 @@ export default defineConfig({
   },
   server: {
     port: 3000,
-    open: true,
+    open: false,
+    watch: {
+      ignored: ["**/public/models/**"],
+    },
   },
 });

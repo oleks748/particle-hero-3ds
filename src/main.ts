@@ -16,7 +16,7 @@ class ParticleMorpher {
   private settings: ParticleSettings;
   private particles: THREE.Points | null = null;
   private readonly models: { [key: string]: Float32Array } = {};
-  private currentShape: string = "queen";
+  private currentShape: string = "explode";
   private isTransitioning: boolean = false;
   private lastTime: number = 0;
   private lastMorphTime: number = 0;
@@ -25,6 +25,7 @@ class ParticleMorpher {
   private mouseWorld: THREE.Vector3 = new THREE.Vector3();
   private modelLoader: ModelLoader;
   private uiManager: UIManager;
+  private readonly initialExplodeDuration: number = 500;
 
   constructor() {
     const canvas = document.getElementById("canvas") as HTMLCanvasElement;
@@ -34,10 +35,10 @@ class ParticleMorpher {
     this.settings = { ...DEFAULT_SETTINGS }; // Clone defaults
 
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x030012);
+    this.scene.background = new THREE.Color(0xffffff);
 
     this.camera = new THREE.PerspectiveCamera(
-      45,
+      38,
       window.innerWidth / window.innerHeight,
       0.1,
       2000
@@ -70,7 +71,7 @@ class ParticleMorpher {
     await this.loadModels();
     this.hideLoader();
 
-    this.morphTo("queen");
+    this.setExplodeInstantly();
     this.animate();
   }
 
@@ -99,14 +100,14 @@ class ParticleMorpher {
         uRadius: { value: this.settings.interactionRadius },
         uStrength: { value: this.settings.interactionStrength },
         uColor: { value: this.settings.currentColor },
-        uSize: { value: this.settings.particleSize },
-        uOpacity: { value: 0.8 },
+        uSize: { value: this.getResponsiveParticleSize() },
+        uOpacity: { value: 1.0 },
         uTime: { value: 0 },
       },
       vertexShader,
       fragmentShader,
       transparent: true,
-      blending: THREE.AdditiveBlending,
+      blending: THREE.NormalBlending,
       depthWrite: false,
     });
 
@@ -120,17 +121,44 @@ class ParticleMorpher {
       if (progressBar) progressBar.style.width = `${percent}%`;
     };
 
-    const [queenPoints, pawnPoints] = await Promise.all([
+    const modelScales = {
+      server: 1.05,
+      wifi: 1.6,
+      coin: 1.2,
+      head: 1.3,
+    };
+
+    const [serverPoints, wifiPoints, coinPoints, headPoints] = await Promise.all([
       this.modelLoader.load(
-        "models/Queen.obj",
+        "models/Server.obj",
         this.settings.particleCount,
-        onProgress
+        onProgress,
+        modelScales.server
       ),
-      this.modelLoader.load("models/Pawn.obj", this.settings.particleCount),
+      this.modelLoader.load(
+        "models/Wifi.obj",
+        this.settings.particleCount,
+        undefined,
+        modelScales.wifi
+      ),
+      this.modelLoader.load(
+        "models/Coin.obj",
+        this.settings.particleCount,
+        undefined,
+        modelScales.coin
+      ),
+      this.modelLoader.load(
+        "models/Head.obj",
+        this.settings.particleCount,
+        undefined,
+        modelScales.head
+      ),
     ]);
 
-    if (queenPoints) this.models["queen"] = queenPoints;
-    if (pawnPoints) this.models["pawn"] = pawnPoints;
+    if (serverPoints) this.models["server"] = serverPoints;
+    if (wifiPoints) this.models["wifi"] = wifiPoints;
+    if (coinPoints) this.models["coin"] = coinPoints;
+    if (headPoints) this.models["head"] = headPoints;
   }
 
   public morphTo(shape: string) {
@@ -164,6 +192,18 @@ class ParticleMorpher {
         this.uiManager.updateActiveShape(shape);
       },
     });
+  }
+
+  private setExplodeInstantly() {
+    if (!this.particles) return;
+
+    const currentPositions = this.particles.geometry.attributes.position
+      .array as Float32Array;
+    currentPositions.set(this.getExplodePositions());
+    this.particles.geometry.attributes.position.needsUpdate = true;
+    this.currentShape = "explode";
+    this.lastMorphTime = performance.now();
+    this.uiManager.updateActiveShape("explode");
   }
 
   private getExplodePositions(): Float32Array {
@@ -209,7 +249,7 @@ class ParticleMorpher {
       const uniforms = this.particles.material.uniforms;
       switch (type) {
         case "size":
-          uniforms.uSize.value = value;
+          uniforms.uSize.value = this.getResponsiveParticleSize(value);
           break;
         case "radius":
           uniforms.uRadius.value = value;
@@ -261,6 +301,22 @@ class ParticleMorpher {
 
     this.renderer.setSize(width, height);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.updateParticleSize();
+  }
+
+  private getResponsiveParticleSize(size = this.settings.particleSize) {
+    const viewportScale = THREE.MathUtils.clamp(window.innerWidth / 1440, 0.75, 1.2);
+    return size * viewportScale;
+  }
+
+  private updateParticleSize() {
+    if (
+      this.particles &&
+      this.particles.material instanceof THREE.ShaderMaterial
+    ) {
+      this.particles.material.uniforms.uSize.value =
+        this.getResponsiveParticleSize();
+    }
   }
 
   private updateCameraPosition() {
@@ -276,8 +332,8 @@ class ParticleMorpher {
       dist = targetDim / (aspect * 2 * Math.tan(fovRad / 2));
     }
 
-    const finalDist = Math.max(dist, 40);
-    this.camera.position.set(0, 10, finalDist);
+    const finalDist = Math.max(dist, 44);
+    this.camera.position.set(0, 12, finalDist);
     this.camera.lookAt(0, 0, 0);
   }
 
@@ -317,7 +373,12 @@ class ParticleMorpher {
     if (!this.settings.autoMorph || this.isTransitioning) return;
 
     const now = performance.now();
-    if (now - this.lastMorphTime > this.settings.autoMorphDuration) {
+    const waitDuration =
+      this.currentShape === "explode"
+        ? this.initialExplodeDuration
+        : this.settings.autoMorphDuration;
+
+    if (now - this.lastMorphTime > waitDuration) {
       const morphKeys = Object.keys(this.models);
       if (morphKeys.length > 0) {
         const currentIndex = morphKeys.indexOf(this.currentShape);

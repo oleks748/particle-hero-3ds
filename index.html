@@ -102,16 +102,24 @@
         <div class="control-section">
           <label class="control-label">Shapes</label>
           <div class="shape-buttons">
-            <button class="shape-btn active" data-shape="queen" id="btn-queen">
+            <button class="shape-btn" data-shape="server" id="btn-server">
               <span class="shape-number">01</span>
-              <span class="shape-name">Queen</span>
+              <span class="shape-name">Server</span>
             </button>
-            <button class="shape-btn" data-shape="pawn" id="btn-pawn">
+            <button class="shape-btn" data-shape="wifi" id="btn-wifi">
               <span class="shape-number">02</span>
-              <span class="shape-name">Pawn</span>
+              <span class="shape-name">Wifi</span>
             </button>
-            <button class="shape-btn" data-shape="explode" id="btn-explode">
+            <button class="shape-btn" data-shape="coin" id="btn-coin">
               <span class="shape-number">03</span>
+              <span class="shape-name">Coin</span>
+            </button>
+            <button class="shape-btn" data-shape="head" id="btn-head">
+              <span class="shape-number">04</span>
+              <span class="shape-name">Head</span>
+            </button>
+            <button class="shape-btn active" data-shape="explode" id="btn-explode">
+              <span class="shape-number">05</span>
               <span class="shape-name">Explode</span>
             </button>
           </div>
@@ -121,7 +129,7 @@
           <div class="control-section half">
             <label class="control-label" for="speed-slider">
               Speed
-              <span class="control-value" id="speed-value">1.0x</span>
+              <span class="control-value" id="speed-value">0.5x</span>
             </label>
             <input
               type="range"
@@ -130,14 +138,14 @@
               min="0.1"
               max="3"
               step="0.1"
-              value="1"
+              value="0.5"
             />
           </div>
 
           <div class="control-section half">
             <label class="control-label" for="particle-size-slider">
               Size
-              <span class="control-value" id="size-value">1.6</span>
+              <span class="control-value" id="size-value">2.5</span>
             </label>
             <input
               type="range"
@@ -146,7 +154,7 @@
               min="0.5"
               max="4"
               step="0.1"
-              value="1.6"
+              value="2.5"
             />
           </div>
         </div>
@@ -157,7 +165,7 @@
             <div class="control-sub-section">
               <label class="control-label sub" for="interaction-radius-slider">
                 Radius
-                <span class="control-value" id="radius-value">3.0</span>
+                <span class="control-value" id="radius-value">8.0</span>
               </label>
               <input
                 type="range"
@@ -166,7 +174,7 @@
                 min="1"
                 max="15"
                 step="0.1"
-                value="3.0"
+                value="8.0"
               />
             </div>
 
@@ -196,8 +204,8 @@
           <div class="color-picker">
             <button
               class="color-btn active"
-              data-color="#088cff"
-              style="background: #088cff"
+              data-color="#0D6FE8"
+              style="background: #0D6FE8"
             ></button>
             <button
               class="color-btn"

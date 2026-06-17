@@ -12,22 +12,27 @@ export class ModelLoader {
   public async load(
     path: string,
     particleCount: number,
-    onProgress?: (percent: number) => void
+    onProgress?: (percent: number) => void,
+    scaleMultiplier: number = 1
   ): Promise<Float32Array | null> {
+    const cacheBustedPath = `${path}${path.includes("?") ? "&" : "?"}v=${Date.now()}`;
+
     return new Promise((resolve) => {
       this.loader.load(
-        path,
+        cacheBustedPath,
         (obj) => {
-          let mesh: THREE.Mesh | null = null;
+          const meshes: THREE.Mesh[] = [];
           obj.traverse((child) => {
             if ((child as THREE.Mesh).isMesh) {
-              mesh = child as THREE.Mesh;
+              meshes.push(child as THREE.Mesh);
             }
           });
 
-          if (mesh) {
-            this.normalizeMesh(mesh);
-            const points = this.samplePointsOnSurface(mesh, particleCount);
+          if (meshes.length > 0) {
+            const geometry = this.mergeMeshGeometries(meshes);
+            this.normalizeGeometry(geometry);
+            geometry.scale(scaleMultiplier, scaleMultiplier, scaleMultiplier);
+            const points = this.samplePointsOnSurface(geometry, particleCount);
             resolve(points);
           } else {
             resolve(null);
@@ -46,21 +51,45 @@ export class ModelLoader {
     });
   }
 
-  private normalizeMesh(mesh: THREE.Mesh, targetSize: number = 20) {
-    mesh.geometry.computeBoundingBox();
-    const box = mesh.geometry.boundingBox!;
+  private mergeMeshGeometries(meshes: THREE.Mesh[]): THREE.BufferGeometry {
+    const positions: number[] = [];
+
+    meshes.forEach((mesh) => {
+      mesh.updateMatrixWorld(true);
+      const position = mesh.geometry.getAttribute("position");
+      const vertex = new THREE.Vector3();
+
+      for (let i = 0; i < position.count; i++) {
+        vertex.fromBufferAttribute(position, i);
+        mesh.localToWorld(vertex);
+        positions.push(vertex.x, vertex.y, vertex.z);
+      }
+    });
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute(
+      "position",
+      new THREE.Float32BufferAttribute(positions, 3)
+    );
+    return geometry;
+  }
+
+  private normalizeGeometry(geometry: THREE.BufferGeometry, targetSize: number = 20) {
+    geometry.computeBoundingBox();
+    const box = geometry.boundingBox!;
     const size = new THREE.Vector3();
     box.getSize(size);
 
     const maxDim = Math.max(size.x, size.y, size.z);
     if (maxDim > 0) {
       const scale = targetSize / maxDim;
-      mesh.geometry.scale(scale, scale, scale);
+      geometry.scale(scale, scale, scale);
     }
-    mesh.geometry.center();
+    geometry.center();
   }
 
-  private samplePointsOnSurface(mesh: THREE.Mesh, count: number): Float32Array {
+  private samplePointsOnSurface(geometry: THREE.BufferGeometry, count: number): Float32Array {
+    const mesh = new THREE.Mesh(geometry);
     const sampler = new MeshSurfaceSampler(mesh).build();
     const sampledPositions = new Float32Array(count * 3);
     const tempPosition = new THREE.Vector3();

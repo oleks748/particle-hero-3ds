@@ -14,15 +14,15 @@ export interface ParticleSettings {
 }
 
 export const DEFAULT_SETTINGS: ParticleSettings = {
-  particleCount: 15000,
-  particleSize: 1.2,
-  animationSpeed: 1,
+  particleCount: 5000,
+  particleSize: 2.5,
+  animationSpeed: 0.5,
   autoRotate: true,
   morphDuration: 2.5,
-  currentColor: new THREE.Color(0x088cff),
+  currentColor: new THREE.Color(0x0D6FE8),
   autoMorph: true,
   autoMorphDuration: 5000,
-  interactionRadius: 3.0,
+  interactionRadius: 8.0,
   interactionStrength: 10.0,
 };
 
@@ -51,7 +51,7 @@ export class UIManager {
   }
 
   private setupShapeButtons() {
-    const shapes = ["queen", "pawn", "explode"];
+    const shapes = ["server", "wifi", "coin", "head", "explode"];
     shapes.forEach((shape) => {
       const btn = document.getElementById(`btn-${shape}`);
       if (btn) {
